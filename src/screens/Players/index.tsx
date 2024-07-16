@@ -19,12 +19,14 @@ import { PlayerStorageDTO } from '@storage/player/PlayerStorageDTO';
 import { playersGetByGroupAndTeam } from '@storage/player/playersGetByGroupAndTeam';
 import { playerRemoveByGroup } from '@storage/player/playerRemoveByGroup';
 import { groupRemoveByName } from '@storage/group/groupRemoveByName';
+import { Loading } from '@components/Loading';
 
 type RouteParams = {
   group: string;
 }
 
 export function Players() {
+  const [ isLoading, setIsLoading ] = useState(true);
   const [ newPlayerName, setNewPlayerName ] = useState('');
   const [ team, setTeam ] = useState('Time A');
   const [ players, setPlayers ] = useState<PlayerStorageDTO[]>([] );
@@ -63,11 +65,16 @@ export function Players() {
 
   async function fetchPlayersByTeam() {
     try{
+      setIsLoading(true);
+
       const playersByTeam = await playersGetByGroupAndTeam(group, team);
       setPlayers(playersByTeam);
+      
     } catch (error) {
       console.log(error);
       Alert.alert('Pessoas', 'Não foi possível carregar as pessoas');
+    }finally {
+      setIsLoading(false);
     }
   }
 
@@ -150,6 +157,7 @@ export function Players() {
         </NumberOfPlayers>
       </HeaderList>
 
+    { isLoading ? <Loading /> :
       <FlatList
         data={players}
         keyExtractor={item => item.name}
@@ -170,6 +178,7 @@ export function Players() {
           players.length === 0 && { flex: 1 }
         ]}
       />
+    }
 
       <Button
         title="Remover turma"
